@@ -15,7 +15,7 @@ impl Command {
         }
 
         let root = Path::new(".git");
-        if root.exists() && root.is_dir() {
+        if !root.exists() || !root.is_dir() {
             return Err("The directory is not git repository".to_owned());
         }
 
