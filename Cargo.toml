@@ -1,7 +1,7 @@
 [package]
 name = "git-open"
 description = "A command line tool to open git project website of the containing repository."
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Kaustubh Patange <developerkp16@gmail.com>"]
 edition = "2018"
 readme = "README.md"
