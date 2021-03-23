@@ -1,0 +1,7 @@
+- Update git-open.nuspec with proper version number
+- Put exe into tools
+- Update VERIFICATION.txt
+- run |
+	choco pack
+	mv *.nupkg git-open.nupkg
+	choco push git-open.nupkg --source https://push.chocolatey.org/

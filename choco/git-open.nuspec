@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+	<id>git-open</id>
+    <version>0.1.0</version>
+    <title>git-open</title>
+    <authors>Kaustubh Patange</authors>
+    <projectUrl>https://github.com/KaustubhPatange/git-open</projectUrl>
+    <packageSourceUrl>https://github.com/KaustubhPatange/git-open</packageSourceUrl>
+    <tags>git command line rust open browser git-open github gitlab bitbucket</tags>
+    <summary>A command line tool to open git project website of the containing repository.</summary>
+    <description>A command line tool to open git project website of the containing repository in the default browser.</description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
