@@ -1,0 +1,83 @@
+name: CI
+
+on: [push]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove Old Release Drafts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases \
+            | tr '\r\n' ' ' \
+            | jq '.[] | select(.draft == true) | .id' \
+            | xargs -I '{}' \
+          curl -X DELETE -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/$GITHUB_REPOSITORY/releases/{}
+
+  deploy:
+    needs: [release]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+      - name: Build
+        run: cargo build --release
+
+      - name: Build Release Mac
+        if: matrix.os == 'macos-latest'
+        run: |
+          strip target/release/git-open
+          mkdir -p release
+          tar -C ./target/release/ -czvf ./release/git-open-mac.tar.gz ./git-open
+
+      - name: Build Release Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo install cargo-deb
+          cargo deb
+          strip target/release/git-open
+          mkdir -p release
+          mv target/debian/*.deb ./release/git-open-linux.deb
+          tar -C ./target/release/ -czvf ./release/git-open-linux.tar.gz ./git-open
+
+      - name: Build Release Win
+        if: matrix.os == 'windows-latest'
+        run: |
+          mkdir -p release
+          tar -C ./target/release/ -czvf ./release/git-open-win.tar.gz ./git-open.exe
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref }}
+          draft: true
+          files: |
+            ./release/*.tar.gz
+            ./release/*.zip
+            ./release/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notification:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(echo ${{ github.sha }} | cut -c -7)"
+      - name: Sending complete notifications
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "${{ github.event.repository.full_name }} with commit [${{ steps.vars.outputs.sha_short }}](${{github.event.repository.html_url}}/commit/${{ github.sha }}) had a successful build!"

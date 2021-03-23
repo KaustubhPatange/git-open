@@ -1,10 +1,19 @@
 [package]
 name = "git-open"
+description = "A command line tool to open git project website of the containing repository."
 version = "0.1.0"
 authors = ["Kaustubh Patange <developerkp16@gmail.com>"]
 edition = "2018"
+readme = "README.md"
+license = "Apache-2.0"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.deb]
+extended-description = """\
+A command line tool to open git project website of the containing repository. \
+"""
+depends = "$auto"
+section = "utility"
+priority = "optional"
 
 [dependencies]
 rust-ini = "0.16"
